@@ -273,6 +273,9 @@ function decide(batch: BatchMsg): Order[] {
     if (batch.slot - s.lastSlot > 300) continue; // gone quiet
     const rise = s.lastPrice / s.lowPrice - 1;
     if (rise < 0.04 || rise > 0.55) continue; // want momentum, not a spike top
+    // Fading momentum is a trap: if price already gave back more than 8
+    // percent from this mint's peak, the move that attracted us is over.
+    if (s.peakPrice > 0 && s.lastPrice / s.peakPrice - 1 <= -0.08) continue;
     const flow = s.buySol + s.sellSol;
     if (flow <= 0) continue;
     const buyShare = s.buySol / flow;
